@@ -15,12 +15,6 @@
       const search = document.getElementById("search")
       search.filters = ["all", "account", "customer", "transaction"]
 
-      const searchData = [
-        { id: 1, title: "Savings Account ****2345" },
-        { id: 2, title: "John Tan" },
-        { id: 3, title: "Transaction: Transfer to Mary" }
-      ]
-
       search.addEventListener("result-selected", (e) => {
         const title = e.detail.toLowerCase()
         search.results = searchResults
@@ -30,7 +24,7 @@
       search.addEventListener("search-change", (e) => {
         const query = e.detail.toLowerCase()
 
-        const searchSuggestions = searchData.filter(item =>
+        const searchSuggestions = searchResults.filter(item =>
           item.title.toLowerCase().includes(query)
         )
 
