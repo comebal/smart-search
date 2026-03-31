@@ -49,11 +49,11 @@ npm install
 npm run dev
 ```
 
-### 3. Build project
+### 3. Run Demo
 
-```
-npm run build
-```
+http://localhost:5173/
+
+https://github.com/user-attachments/assets/d648ff74-8d3d-4b5c-9ea9-81c33471659c
 
 ---
 
