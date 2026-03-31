@@ -83,39 +83,100 @@ npm run test:watch
 
   search.filters = ["all", "account", "customer", "transaction"];
 
-  search.results = [
-    {
-      id: "cust-001",
-      type: "customer",
-      title: "John Tan",
-      subtitle: "Customer ID: C10293"
-    },
-    {
-      id: "acct-001",
-      type: "account",
-      title: "Savings Account",
-      subtitle: "**** 2345"
-    }
-  ];
-
   search.addEventListener("search-change", (e) => {
-    const query = e.detail.toLowerCase();
+    const query = e.detail.toLowerCase()
 
-    if (query.length < 2) {
-      search.searchSuggestions = [];
-      return;
-    }
+    const searchSuggestions = searchResults.filter(item =>
+      item.title.toLowerCase().includes(query)
+    )
 
-    search.searchSuggestions = search.results
-      .filter(r =>
-        r.title.toLowerCase().includes(query)
-      )
-      .slice(0, 5);
+    search.searchSuggestions = searchSuggestions
   });
 
   search.addEventListener("result-selected", (e) => {
-    console.log("Selected:", e.detail);
+    const title = e.detail.toLowerCase()
+    search.results = searchResults
+    search.searchSuggestions = []
   });
+
+  search.addEventListener("filter-change", (e) => {
+    const query = e.detail
+  })
+
+  const searchResults = [
+    {
+      "id": "cust-001",
+      "type": "customer",
+      "title": "John Tan",
+      "subtitle": "Customer ID: C10293",
+      "metadata": {
+        "email": "john.tan@email.com",
+        "phone": "+65 8123 4567"
+      }
+    },
+    {
+      "id": "acct-001",
+      "type": "account",
+      "title": "Savings Account",
+      "subtitle": "**** 2345",
+      "metadata": {
+        "balance": 12500.5,
+        "currency": "SGD",
+        "status": "Active"
+      }
+    },
+    {
+      "id": "acct-002",
+      "type": "account",
+      "title": "Current Account",
+      "subtitle": "**** 9821",
+      "metadata": {
+        "balance": 8200.75,
+        "currency": "SGD",
+        "status": "Active"
+      }
+    },
+    {
+      "id": "txn-001",
+      "type": "transaction",
+      "title": "Transfer to Mary Lim",
+      "subtitle": "SGD 250.00",
+      "metadata": {
+        "date": "2026-03-20",
+        "status": "Completed"
+      }
+    },
+    {
+      "id": "txn-002",
+      "type": "transaction",
+      "title": "Salary Credit - TechCorp Pte Ltd",
+      "subtitle": "SGD 4,500.00",
+      "metadata": {
+        "date": "2026-03-01",
+        "status": "Completed"
+      }
+    },
+    {
+      "id": "cust-002",
+      "type": "customer",
+      "title": "Mary Lim",
+      "subtitle": "Customer ID: C20488",
+      "metadata": {
+        "email": "mary.lim@email.com",
+        "phone": "+65 9123 8765"
+      }
+    },
+    {
+      "id": "txn-003",
+      "type": "transaction",
+      "title": "Payment to Amazon",
+      "subtitle": "SGD 89.90",
+      "metadata": {
+        "date": "2026-03-18",
+        "status": "Completed"
+      }
+    }
+  ]
 </script>
 ```
 
