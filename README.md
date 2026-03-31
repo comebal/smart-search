@@ -253,6 +253,9 @@ Supports automatic dark mode via `prefers-color-scheme`.
 
 ---
 
+## How to import
+* install: npm install @comebal/smart-search lit
+
 ## 🧑‍💻 Author
 
 Benedict Bisana
