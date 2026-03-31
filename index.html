@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>smart-search</title>
+    <link rel="stylesheet" href="./src/index.css" />
+    <script type="module" src="/src/smart-search.ts"></script>
+  </head>
+  <body>
+    <smart-search id="search" placeholder="Enter search term"></smart-search>
+
+    <script type="text/javascript">
+      const search = document.getElementById("search")
+      search.filters = ["all", "account", "customer", "transaction"]
+
+      const searchData = [
+        { id: 1, title: "Savings Account ****2345" },
+        { id: 2, title: "John Tan" },
+        { id: 3, title: "Transaction: Transfer to Mary" }
+      ]
+
+      search.addEventListener("result-selected", (e) => {
+        const title = e.detail.toLowerCase()
+        search.results = searchResults
+        search.searchSuggestions = []
+      })
+
+      search.addEventListener("search-change", (e) => {
+        const query = e.detail.toLowerCase()
+
+        const searchSuggestions = searchData.filter(item =>
+          item.title.toLowerCase().includes(query)
+        )
+
+        search.searchSuggestions = searchSuggestions
+      })
+
+      search.addEventListener("filter-change", (e) => {
+        const query = e.detail
+      })
+
+      const searchResults = [
+        {
+          "id": "cust-001",
+          "type": "customer",
+          "title": "John Tan",
+          "subtitle": "Customer ID: C10293",
+          "metadata": {
+            "email": "john.tan@email.com",
+            "phone": "+65 8123 4567"
+          }
+        },
+        {
+          "id": "acct-001",
+          "type": "account",
+          "title": "Savings Account",
+          "subtitle": "**** 2345",
+          "metadata": {
+            "balance": 12500.5,
+            "currency": "SGD",
+            "status": "Active"
+          }
+        },
+        {
+          "id": "acct-002",
+          "type": "account",
+          "title": "Current Account",
+          "subtitle": "**** 9821",
+          "metadata": {
+            "balance": 8200.75,
+            "currency": "SGD",
+            "status": "Active"
+          }
+        },
+        {
+          "id": "txn-001",
+          "type": "transaction",
+          "title": "Transfer to Mary Lim",
+          "subtitle": "SGD 250.00",
+          "metadata": {
+            "date": "2026-03-20",
+            "status": "Completed"
+          }
+        },
+        {
+          "id": "txn-002",
+          "type": "transaction",
+          "title": "Salary Credit - TechCorp Pte Ltd",
+          "subtitle": "SGD 4,500.00",
+          "metadata": {
+            "date": "2026-03-01",
+            "status": "Completed"
+          }
+        },
+        {
+          "id": "cust-002",
+          "type": "customer",
+          "title": "Mary Lim",
+          "subtitle": "Customer ID: C20488",
+          "metadata": {
+            "email": "mary.lim@email.com",
+            "phone": "+65 9123 8765"
+          }
+        },
+        {
+          "id": "txn-003",
+          "type": "transaction",
+          "title": "Payment to Amazon",
+          "subtitle": "SGD 89.90",
+          "metadata": {
+            "date": "2026-03-18",
+            "status": "Completed"
+          }
+        }
+      ]
+    </script>
+  </body>
+</html>
