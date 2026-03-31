@@ -9,6 +9,7 @@
   --highlight-color:rgba(0, 0, 0, 0.07);
   --search-bg: #FFFFFF;
   --search-icon: url('./assets/icons-search-black.png');
+  text-align: left;
 }
 
 @media (prefers-color-scheme: dark) {
