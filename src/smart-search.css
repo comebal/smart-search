@@ -1,6 +1,7 @@
 :host {
   color-scheme: light dark;
   background-color: #ffffff;
+  font-family: Arial, sans-serif;
   --bg-color: #ffffff;
   --text-color: #1a1a1a;
   --dropdown-bg: #f9f9f9;
