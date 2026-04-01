@@ -22,13 +22,19 @@ describe('SearchInput Interactions', () => {
     const getInput = () => getEl().shadowRoot!.querySelector('input')!;
 
     describe('Keyboard Interactions', () => {
-        test('ArrowDown and ArrowUp should cycle through suggestions', async () => {
+        test('ArrowDown and ArrowUp should cycle through suggestions including typed input', async () => {
             const el = getEl() as SearchInput;
             const input = getInput();
 
+            el._searchText = 'Ap';
+            el._isDropdownOpen = true;
             el.searchSuggestions = mockSuggestions;
             await el.updateComplete;
 
+            expect(el.shadowRoot?.querySelector('.selected')?.textContent?.trim()).toBe('Search for "Ap"');
+
+            fireEvent.keyDown(input, { key: 'ArrowDown' });
+            await el.updateComplete;
             expect(el.shadowRoot?.querySelector('.selected')?.textContent?.trim()).toBe('Apple');
 
             fireEvent.keyDown(input, { key: 'ArrowDown' });
@@ -41,31 +47,29 @@ describe('SearchInput Interactions', () => {
 
             fireEvent.keyDown(input, { key: 'ArrowDown' });
             await el.updateComplete;
-            expect(el.shadowRoot?.querySelector('.selected')?.textContent?.trim()).toBe('Apple');
+            expect(el.shadowRoot?.querySelector('.selected')?.textContent?.trim()).toBe('Search for "Ap"');
 
             fireEvent.keyDown(input, { key: 'ArrowUp' });
             await el.updateComplete;
-
             expect(el.shadowRoot?.querySelector('.selected')?.textContent?.trim()).toBe('Cherry');
         });
 
-        test('Enter key should select the current item and dispatch event', async () => {
+        test('Enter key should select typed input when first item is highlighted', async () => {
             const el = getEl() as SearchInput;
             const input = getInput();
             const spy = vi.fn();
 
+            el._searchText = 'Ap';
+            el._isDropdownOpen = true;
             el.searchSuggestions = mockSuggestions;
-            el._selectedIdx = 0
+            el._selectedIdx = 0;
             el.addEventListener('result-selected', (e: any) => spy(e.detail));
-            await el.updateComplete;
-
-            fireEvent.keyDown(input, { key: 'ArrowDown' });
             await el.updateComplete;
 
             fireEvent.keyDown(input, { key: 'Enter' });
             await el.updateComplete;
 
-            expect(spy).toHaveBeenCalledWith('Banana');
+            expect(spy).toHaveBeenCalledWith('Ap');
             expect(el.searchSuggestions.length).toBe(0);
         });
 
@@ -87,7 +91,9 @@ describe('SearchInput Interactions', () => {
             const el = getEl() as SearchInput;
             const spy = vi.fn();
 
+            el._searchText = '';
             el.searchSuggestions = mockSuggestions;
+            el._isDropdownOpen = true;
             el.addEventListener('result-selected', (e: any) => spy(e.detail));
             await el.updateComplete;
 
@@ -100,6 +106,7 @@ describe('SearchInput Interactions', () => {
         test('Clicking outside should clear suggestions', async () => {
             const el = getEl() as SearchInput;
             el.searchSuggestions = mockSuggestions;
+            el._isDropdownOpen = true;
             await el.updateComplete;
 
             fireEvent.click(document.body);
@@ -147,6 +154,7 @@ describe('SearchInput Interactions', () => {
 
         test('should handle empty suggestions array gracefully', async () => {
             const el = getEl();
+            el._searchText = '';
             el.searchSuggestions = [];
             await el.updateComplete;
 
@@ -174,20 +182,30 @@ describe('SearchInput Interactions', () => {
             const el = getEl();
             el._searchText = '[[.*+?^${}()|[\\]\\\\]';
             el.searchSuggestions = [{ title: 'Special (Characters) Item' }];
+            el._isDropdownOpen = true;
             await el.updateComplete;
 
-            const listItem = el.shadowRoot?.querySelector('li');
-            expect(listItem?.textContent?.trim()).toBe('Special (Characters) Item');
+            const items = [...el.shadowRoot!.querySelectorAll('li')];
+            const target = items.find(item =>
+                item.textContent?.includes('Special (Characters) Item')
+            );
+
+            expect(target?.textContent?.trim()).toBe('Special (Characters) Item');
         });
 
         test('should handle very long suggestion titles without breaking logic', async () => {
             const el = getEl();
             const longTitle = 'a'.repeat(1000);
+
+            el._searchText = 'aa';
+            el._isDropdownOpen = true;
             el.searchSuggestions = [{ title: longTitle }];
             await el.updateComplete;
 
-            const listItem = el.shadowRoot?.querySelector('li');
-            expect(listItem?.textContent?.trim()).toBe(longTitle);
+            const items = [...el.shadowRoot!.querySelectorAll('li')];
+            const target = items.find(item => item.textContent?.includes(longTitle));
+
+            expect(target?.textContent?.trim()).toBe(longTitle);
         });
 
         test('should handle missing placeholder property', async () => {

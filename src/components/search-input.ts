@@ -8,12 +8,13 @@ import { renderHighlight } from "../utils/highlights";
 export class SearchInput extends LitElement {
     @state() _selectedIdx = 0;
     @state() _searchText = "";
+    @state() _isDropdownOpen = false;
 
     @property({ type: Array })
     searchSuggestions: SearchSuggestions[] = [];
 
     @property({ type: String })
-    placeholder: string = ""
+    placeholder: string = "";
 
     private _boundPosition!: () => void;
 
@@ -42,8 +43,25 @@ export class SearchInput extends LitElement {
         window.removeEventListener("scroll", this._boundPosition, true);
     }
 
+    get computedSuggestions(): SearchSuggestions[] {
+        const text = this._searchText.trim();
+
+        if (!this._isDropdownOpen) return [];
+
+        if (!text) return this.searchSuggestions;
+
+        return [
+            { title: text },
+            ...this.searchSuggestions.filter(
+                (item) => item.title.toLowerCase() !== text.toLowerCase()
+            )
+        ];
+    }
+
     _handleKeyDown(e: KeyboardEvent) {
-        const listLength = this.searchSuggestions.length;
+        const suggestions = this.computedSuggestions;
+        const listLength = suggestions.length;
+
         if (listLength === 0 && e.key !== 'Escape') return;
 
         switch (e.key) {
@@ -59,7 +77,7 @@ export class SearchInput extends LitElement {
 
             case 'Enter':
                 e.preventDefault();
-                this._handleSelection(this.searchSuggestions[this._selectedIdx]);
+                this._handleSelection(suggestions[this._selectedIdx]);
                 break;
 
             case 'Escape':
@@ -84,25 +102,27 @@ export class SearchInput extends LitElement {
     _closeDropdown() {
         this._selectedIdx = 0;
         this.searchSuggestions = [];
+        this._isDropdownOpen = false;
     }
 
     _handleOutsideClick = (e: MouseEvent) => {
         if (!this.contains(e.target as Node)) {
-            this.searchSuggestions = [];
-            this._selectedIdx = 0;
+            this._closeDropdown();
         }
     }
 
     renderSearchSuggestions(listId: string) {
+        const suggestions = this.computedSuggestions;
+
         return html`
-            <div class="dropdown ${this.searchSuggestions.length > 0 ? "show" : "hide"}">
+            <div class="dropdown ${suggestions.length > 0 ? "show" : "hide"}">
                 <ul
                     aria-label="Search suggestions" 
                     id="${listId}" 
                     class="results-suggestions" 
                     role="listbox"
                 >
-                    ${this.searchSuggestions.map((r, index) => {
+                    ${suggestions.map((r, index) => {
                         const isSelected = index === this._selectedIdx;
                         return html`
                             <li 
@@ -112,18 +132,20 @@ export class SearchInput extends LitElement {
                                 class="${isSelected ? "selected" : ""}"
                                 @click="${() => this._handleSelection(r)}"
                             >
-                                ${renderHighlight(r.title, this._searchText)}
+                                ${index === 0 && this._searchText.trim()
+                                    ? html`Search for "${r.title}"`
+                                    : renderHighlight(r.title, this._searchText)}
                             </li>
                         `;
                     })}
                 </ul>
             </div>
-        `
+        `;
     }
 
     updateDropdownPosition() {
-        const input = this.shadowRoot?.querySelector("input") as HTMLInputElement;;
-        const dropdown = this.shadowRoot?.querySelector(".dropdown") as HTMLElement;;
+        const input = this.shadowRoot?.querySelector("input") as HTMLInputElement;
+        const dropdown = this.shadowRoot?.querySelector(".dropdown") as HTMLElement;
 
         if (!input || !dropdown) return;
 
@@ -141,21 +163,26 @@ export class SearchInput extends LitElement {
     onSearch = (e: Event) => {
         const input = e.target as HTMLInputElement;
         this._searchText = input.value;
+        this._selectedIdx = 0;
 
         if (this._searchText.length >= 2) {
+            this._isDropdownOpen = true;
+
             this.dispatchEvent(
                 new CustomEvent("search-change", {
                     detail: this._searchText,
                     bubbles: true,
                     composed: true
                 })
-            )
-        }else{
-            this._closeDropdown()
+            );
+        } else {
+            this._closeDropdown();
         }
     }
 
     render() {
+        const suggestions = this.computedSuggestions;
+
         return html`
             <div id="input-container">
                 <div class="input-search">
@@ -166,17 +193,16 @@ export class SearchInput extends LitElement {
                         type="text" 
                         placeholder="${this.placeholder}" 
                         @input="${this.onSearch}"
-                        
                         role="combobox"
                         aria-autocomplete="list"
                         aria-haspopup="listbox"
-                        aria-expanded="${this.searchSuggestions.length > 0}"
+                        aria-expanded="${suggestions.length > 0}"
                         aria-controls="results-listbox"
                         aria-activedescendant="${this._selectedIdx >= 0 ? `option-${this._selectedIdx}` : ''}"
                     />
                 </div>
                 ${this.renderSearchSuggestions("results-listbox")}
             </div> 
-        `
+        `;
     }
 }
